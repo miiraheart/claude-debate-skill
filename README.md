@@ -36,7 +36,28 @@ Built on techniques from five multi-agent debate papers:
   - `scrapling-fetch` — bypasses bot detection on product pages
   - `perplexity-mcp` — web-grounded search for price verification
 
-## Installation
+## Quick Install
+
+One command to clone, install the skill + command, and set the env var:
+
+```bash
+git clone https://github.com/miiraheart/claude-debate-skill.git ~/.claude/skills/debate && \
+cp ~/.claude/skills/debate/commands/debate.md ~/.claude/commands/debate.md && \
+echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.zshrc && \
+source ~/.zshrc
+```
+
+Then open Claude Code and run:
+
+```
+/debate best ergonomic keyboard under $200 for programming
+```
+
+That's it. The skill, command, and scripts are all in place.
+
+## Manual Installation
+
+If you prefer more control:
 
 ### 1. Clone the repo
 
@@ -46,7 +67,7 @@ git clone https://github.com/miiraheart/claude-debate-skill.git
 
 ### 2. Install as a Claude Code skill
 
-Copy or symlink into your Claude Code skills directory:
+Symlink or copy into your Claude Code skills directory:
 
 ```bash
 # Option A: Symlink (recommended — stays in sync with repo)
@@ -69,7 +90,11 @@ cp claude-debate-skill/commands/debate.md ~/.claude/commands/debate.md
 The skill references scripts via `$DEBATE_SKILL_DIR`. Add to your shell profile:
 
 ```bash
-export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"
+# zsh
+echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.zshrc
+
+# bash
+echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.bashrc
 ```
 
 Or if you installed elsewhere, point to your installation path.
