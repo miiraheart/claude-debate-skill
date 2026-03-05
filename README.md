@@ -87,13 +87,11 @@ Without these servers, agents still research via built-in `WebSearch` and `WebFe
 
 ## Quick Install
 
-One command to clone, install the skill + command, and set the env var:
+One command to clone and install the skill + command:
 
 ```bash
 git clone https://github.com/miiraheart/claude-debate-skill.git ~/.claude/skills/debate && \
-cp ~/.claude/skills/debate/commands/debate.md ~/.claude/commands/debate.md && \
-echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.zshrc && \
-source ~/.zshrc
+cp ~/.claude/skills/debate/commands/debate.md ~/.claude/commands/debate.md
 ```
 
 Then open Claude Code and run:
@@ -134,19 +132,7 @@ To use `/debate` as a slash command in Claude Code:
 cp claude-debate-skill/commands/debate.md ~/.claude/commands/debate.md
 ```
 
-### 4. Set the environment variable
-
-The skill references scripts via `$DEBATE_SKILL_DIR`. Add to your shell profile:
-
-```bash
-# zsh
-echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.zshrc
-
-# bash
-echo 'export DEBATE_SKILL_DIR="$HOME/.claude/skills/debate"' >> ~/.bashrc
-```
-
-Or if you installed elsewhere, point to your installation path.
+The skill defaults to `~/.claude/skills/debate/`. If you install elsewhere, set `DEBATE_SKILL_DIR` to your path.
 
 ## Usage
 

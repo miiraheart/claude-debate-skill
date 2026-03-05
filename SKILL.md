@@ -19,7 +19,7 @@ This applies to ALL phases: research, debate rounds, elimination votes, finals, 
 
 - **Communication**: Pure prompt relay via files — no direct agent-to-agent talk (from Mysti)
 - **Topology**: Dense — all agents see all responses each round (from debate-or-vote)
-- **State management**: Python scripts in `$DEBATE_SKILL_DIR/scripts/` handle convergence detection, vote tallying, domain detection, and session state
+- **State management**: Python scripts in `${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/` handle convergence detection, vote tallying, domain detection, and session state
 - **Context passing**: `/tmp/debate-session/` symlink (always points to latest session). Each session gets a timestamped directory under `/tmp/debate-sessions/` (e.g. `debate-20260304-143022/`). Previous sessions are preserved.
 
 ### Mandatory Steps Checklist (DO NOT SKIP ANY)
@@ -47,7 +47,7 @@ These steps are marked with ⛔ throughout the document. If you skip any, the de
 ⛔ **BLOCKING — DO NOT SKIP**: You MUST run init before ANY other action. Do NOT `mkdir` manually.
 
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py init "$ARGUMENTS"
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py init "$ARGUMENTS"
 ```
 
 This creates a timestamped session directory (e.g. `/tmp/debate-sessions/debate-20260304-143022/`) with phase subdirectories and `state.json`. A symlink at `/tmp/debate-session` always points to the latest session. Previous sessions are preserved — never overwritten.
@@ -56,10 +56,10 @@ This creates a timestamped session directory (e.g. `/tmp/debate-sessions/debate-
 
 Then read prompt templates:
 ```bash
-cat $DEBATE_SKILL_DIR/prompts/researcher.md
-cat $DEBATE_SKILL_DIR/prompts/debater.md
-cat $DEBATE_SKILL_DIR/prompts/judge.md
-cat $DEBATE_SKILL_DIR/prompts/synthesizer.md
+cat ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/prompts/researcher.md
+cat ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/prompts/debater.md
+cat ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/prompts/judge.md
+cat ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/prompts/synthesizer.md
 ```
 
 ---
@@ -70,8 +70,8 @@ cat $DEBATE_SKILL_DIR/prompts/synthesizer.md
 
 ### Step 1: Detect domain and select personas
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py detect-domain "$ARGUMENTS"
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py select-personas <detected_domain>
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py detect-domain "$ARGUMENTS"
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py select-personas <detected_domain>
 ```
 
 ### Step 2: Spawn 5 research agents in parallel
@@ -104,7 +104,7 @@ Each agent gets full tool access. The researcher prompt from `prompts/researcher
 
 After all 5 complete:
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py summarize-research
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py summarize-research
 ```
 
 ### Step 4: Product URL validation
@@ -124,7 +124,7 @@ For each unique product found across all 5 agents' research:
 ```
 
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"verified_products": {"Product A": "https://verified-url...", "Product B": "https://verified-url..."}, "unverified_products": ["Product C"]}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py update-state '{"verified_products": {"Product A": "https://verified-url...", "Product B": "https://verified-url..."}, "unverified_products": ["Product C"]}'
 ```
 
 **Rules:**
@@ -176,14 +176,14 @@ Task(
 ⛔ **BLOCKING — DO NOT SKIP**: Run duplicate check before proceeding to Phase 3.
 
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py check-duplicates
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py check-duplicates
 ```
 
 If duplicates found, re-run the duplicate agent with explicit forced-disagreement instruction. Do NOT proceed to Phase 3 with duplicate picks — it breaks the adversarial structure.
 
 ### Save state after Phase 2
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"phase": "phase2-complete", "picks": {"1": "Product A", "2": "Product B", ...}}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py update-state '{"phase": "phase2-complete", "picks": {"1": "Product A", "2": "Product B", ...}}'
 ```
 (Replace with actual agent picks extracted from opening statements.)
 
@@ -217,7 +217,7 @@ Using their positions as additional perspective, provide your updated position o
 
 The orchestrator builds this automatically:
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py format-debate-context <round> <agent_id>
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py format-debate-context <round> <agent_id>
 ```
 
 ### Per-round execution
@@ -256,7 +256,7 @@ For each round R (1 to 3):
 3. **Assess convergence** — ⛔ **MANDATORY after every round. Follow its recommendation.**
 
    ```bash
-   python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py assess-convergence {R}
+   python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py assess-convergence {R}
    ```
 
    Exit codes:
@@ -308,7 +308,7 @@ For each round R (1 to 3):
 
    Before each public debate round, paired agents can exchange private critiques:
    ```bash
-   python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py format-private-pairs {R}
+   python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py format-private-pairs {R}
    ```
    This outputs agent pairings (round-robin). For each pair:
    ```
@@ -358,7 +358,7 @@ Each agent gets:
 ⛔ **BLOCKING — DO NOT SKIP**: Run vote_tallier.py after EVERY elimination round. Do NOT manually count votes or declare eliminations without this script.
 
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/vote_tallier.py /tmp/debate-session/phase4/
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/vote_tallier.py /tmp/debate-session/phase4/
 ```
 
 The script implements the full chain from elimination_game (analysis.md:811-884):
@@ -392,13 +392,13 @@ Round 3: 3 products → eliminate 1 → 2 remain ✓
 For each additional round, pass cumulative votes for tie-break step 3:
 ```bash
 mkdir -p /tmp/debate-session/phase4/round-{N}
-python3 $DEBATE_SKILL_DIR/scripts/vote_tallier.py /tmp/debate-session/phase4/round-{N}/ --cumulative '{"ProductA": 2, "ProductB": 1}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/vote_tallier.py /tmp/debate-session/phase4/round-{N}/ --cumulative '{"ProductA": 2, "ProductB": 1}'
 ```
 (Use the `cumulative_votes` from prior tally outputs to feed into the next round.)
 
 ### Save state after Phase 4
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"phase": "phase4-complete", "finalists": ["Winner Pick", "Runner Pick"], "eliminated": ["Elim1", "Elim2", "Elim3"], "cumulative_votes": {"Elim1": 3, "Elim2": 2, ...}}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py update-state '{"phase": "phase4-complete", "finalists": ["Winner Pick", "Runner Pick"], "eliminated": ["Elim1", "Elim2", "Elim3"], "cumulative_votes": {"Elim1": 3, "Elim2": 2, ...}}'
 ```
 
 ### User gate
@@ -491,7 +491,7 @@ Task(
 
 Get judge input data:
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py format-judge-input
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py format-judge-input
 ```
 
 ### Step 3: Forced revision of judgment
@@ -531,7 +531,7 @@ Typically 3 eliminated agents serve as jurors (the 3 eliminated in Phase 4).
 
 ### Save state after Phase 5
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"phase": "phase5-complete", "winner": "Winner Product", "runner_up": "Runner-up Product"}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py update-state '{"phase": "phase5-complete", "winner": "Winner Product", "runner_up": "Runner-up Product"}'
 ```
 
 ---
@@ -542,7 +542,7 @@ python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"phase":
 
 ### Compile all evidence
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py compile-synthesis
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py compile-synthesis
 ```
 
 ### 3-level synthesis fallback (from Mysti, analysis.md:912-921)
@@ -621,7 +621,7 @@ Read and display `/tmp/debate-session/phase6/synthesis.md` as the final output.
 Configurable 0-10 scale. Default is level 9 (empirically optimal at 90% deference).
 Set during init or via `update-state`:
 ```bash
-python3 $DEBATE_SKILL_DIR/scripts/debate_orchestrator.py update-state '{"agreement_intensity": 7}'
+python3 ${DEBATE_SKILL_DIR:-~/.claude/skills/debate}/scripts/debate_orchestrator.py update-state '{"agreement_intensity": 7}'
 ```
 
 | Level | Behavior |
