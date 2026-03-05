@@ -32,9 +32,58 @@ Built on techniques from five multi-agent debate papers:
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
 - Python 3.10+
 - Claude Code tools: `Task`, `WebSearch`, `WebFetch`, `AskUserQuestion`
-- Recommended MCP servers (optional but improve research quality):
-  - `scrapling-fetch` — bypasses bot detection on product pages
-  - `perplexity-mcp` — web-grounded search for price verification
+
+### Recommended MCP Servers
+
+These are **optional** — the skill falls back to `WebSearch`/`WebFetch` without them — but they significantly improve research quality:
+
+**[scrapling-fetch-mcp](https://github.com/cyberchitta/scrapling-fetch-mcp)** — bypasses bot detection on product pages that block standard fetching:
+
+```bash
+uv tool install scrapling-fetch-mcp
+uvx --from scrapling-fetch-mcp scrapling install
+```
+
+Then add to your Claude Code config (`~/.claude.json` or Claude Desktop config):
+
+```json
+{
+  "mcpServers": {
+    "scrapling-fetch": {
+      "command": "uvx",
+      "args": ["scrapling-fetch-mcp"]
+    }
+  }
+}
+```
+
+**[perplexity-mcp](https://github.com/jsonallen/perplexity-mcp)** — web-grounded search with citations, useful for price verification and fact-checking:
+
+```bash
+# Via Smithery (recommended)
+npx -y @smithery/cli install perplexity-mcp --client claude
+
+# Or manually add to your Claude config:
+```
+
+```json
+{
+  "mcpServers": {
+    "perplexity-mcp": {
+      "command": "uvx",
+      "args": ["perplexity-mcp"],
+      "env": {
+        "PERPLEXITY_API_KEY": "your-key-here",
+        "PERPLEXITY_MODEL": "sonar"
+      }
+    }
+  }
+}
+```
+
+> Get a Perplexity API key at [perplexity.ai](https://www.perplexity.ai/)
+
+Without these servers, agents still research via built-in `WebSearch` and `WebFetch` tools — they just can't bypass bot-protected pages or use Perplexity's grounded search.
 
 ## Quick Install
 
